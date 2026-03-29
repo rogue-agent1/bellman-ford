@@ -1,13 +1,3 @@
 # bellman_ford
-
-Bellman-Ford shortest path — handles negative weights
-
-## Usage
-
-```bash
-python3 bellman_ford.py --help
-```
-
-## License
-
-MIT
+Bellman-Ford — shortest paths with negative edge weights.
+Single-file Python, zero dependencies.

@@ -1,23 +1,35 @@
 #!/usr/bin/env python3
-"""Bellman-Ford — shortest paths with negative edge detection."""
-import sys
-def bellman_ford(n, edges, start):
-    dist = [float("inf")] * n; dist[start] = 0; prev = [None]*n
-    for _ in range(n-1):
+"""Bellman-Ford shortest path (handles negative weights). Zero dependencies."""
+
+def bellman_ford(n, edges, source):
+    """edges: list of (u, v, weight). Returns (dist, prev) or raises if negative cycle."""
+    dist = [float("inf")] * n
+    prev = [None] * n
+    dist[source] = 0
+    for _ in range(n - 1):
+        updated = False
         for u, v, w in edges:
-            if dist[u] + w < dist[v]: dist[v] = dist[u] + w; prev[v] = u
+            if dist[u] != float("inf") and dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                prev[v] = u
+                updated = True
+        if not updated: break
+    # Check for negative cycles
     for u, v, w in edges:
-        if dist[u] + w < dist[v]: return None, None  # negative cycle
+        if dist[u] != float("inf") and dist[u] + w < dist[v]:
+            raise ValueError("Negative cycle detected")
     return dist, prev
-def path(prev, start, end):
-    p = []; n = end
-    while n is not None and n != start: p.append(n); n = prev[n]
-    if n == start: p.append(start)
-    return list(reversed(p))
-def cli():
-    edges = [(0,1,4),(0,2,5),(1,2,-3),(2,3,4),(3,1,2)]
+
+def reconstruct_path(prev, target):
+    path = []
+    node = target
+    while node is not None:
+        path.append(node)
+        node = prev[node]
+    return list(reversed(path)) if path else []
+
+if __name__ == "__main__":
+    edges = [(0,1,4),(0,2,2),(1,3,-3),(2,1,1),(2,3,5)]
     dist, prev = bellman_ford(4, edges, 0)
-    if dist is None: print("  Negative cycle detected!"); return
-    print("  From node 0:")
-    for i in range(4): print(f"    → {i}: dist={dist[i]} path={path(prev,0,i)}")
-if __name__ == "__main__": cli()
+    print(f"Distances from 0: {dist}")
+    print(f"Path to 3: {reconstruct_path(prev, 3)}")
